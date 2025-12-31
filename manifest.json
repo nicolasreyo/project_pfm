@@ -2,7 +2,7 @@
   "name": "Mi PFM - Finanzas Personales",
   "short_name": "Mi PFM",
   "description": "Administrador de finanzas personales",
-  "start_url": "/",
+  "start_url": "/project_pfm/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#2563eb",

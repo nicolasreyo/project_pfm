@@ -1,0 +1,24 @@
+{
+  "name": "Mi PFM - Finanzas Personales",
+  "short_name": "Mi PFM",
+  "description": "Administrador de finanzas personales",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2563eb",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' fill='%232563eb'/%3E%3Cpath d='M96 48c-26.5 0-48 21.5-48 48s21.5 48 48 48 48-21.5 48-48-21.5-48-48-48zm0 8c22.1 0 40 17.9 40 40s-17.9 40-40 40-40-17.9-40-40 17.9-40 40-40z' fill='%23fff'/%3E%3Cpath d='M96 70c-3.3 0-6 2.7-6 6v10h-10c-3.3 0-6 2.7-6 6s2.7 6 6 6h10v10c0 3.3 2.7 6 6 6s6-2.7 6-6V98h10c3.3 0 6-2.7 6-6s-2.7-6-6-6h-10V76c0-3.3-2.7-6-6-6z' fill='%23fff'/%3E%3C/svg%3E",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' fill='%232563eb'/%3E%3Cpath d='M256 128c-70.7 0-128 57.3-128 128s57.3 128 128 128 128-57.3 128-128-57.3-128-128-128zm0 21.3c58.9 0 106.7 47.8 106.7 106.7s-47.8 106.7-106.7 106.7-106.7-47.8-106.7-106.7 47.8-106.7 106.7-106.7z' fill='%23fff'/%3E%3Cpath d='M256 186.7c-8.8 0-16 7.2-16 16v26.6h-26.7c-8.8 0-16 7.2-16 16s7.2 16 16 16H240v26.7c0 8.8 7.2 16 16 16s16-7.2 16-16v-26.7h26.7c8.8 0 16-7.2 16-16s-7.2-16-16-16H272v-26.6c0-8.8-7.2-16-16-16z' fill='%23fff'/%3E%3C/svg%3E",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

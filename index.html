@@ -11,7 +11,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="manifest" href="./manifest.json">
-<link rel="apple-touch-icon" href="./icon-active.svg">
+<link rel="apple-touch-icon" href="./icon-active.jpg">
 <style>
 * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
 :root {
@@ -148,9 +148,8 @@ body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); 
 
 /* Upload buttons */
 .icon-upload-row { display:flex; gap:10px; margin-top:14px; padding-top:14px; border-top:1px solid var(--border); }
-.icon-upload-btn { flex:1; display:flex; flex-direction:column; align-items:center; gap:6px; padding:12px 8px; border-radius:14px; border:1.5px dashed var(--border); background:var(--bg); cursor:pointer; transition:all 0.2s; position:relative; overflow:hidden; }
-.icon-upload-btn:hover { border-color:var(--accent); background:rgba(37,99,235,0.03); }
-.icon-upload-btn input[type=file] { position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%; }
+.icon-upload-btn { flex:1; display:flex; flex-direction:column; align-items:center; gap:6px; padding:12px 8px; border-radius:14px; border:1.5px dashed var(--border); background:var(--bg); cursor:pointer; transition:all 0.2s; font-family:inherit; }
+.icon-upload-btn:hover, .icon-upload-btn:active { border-color:var(--accent); background:rgba(37,99,235,0.07); }
 .icon-upload-emoji { font-size:22px; }
 .icon-upload-label { font-size:11px; font-weight:700; color:var(--text2); text-align:center; line-height:1.3; }
 .icon-upload-sub { font-size:10px; color:var(--text3); }
@@ -350,19 +349,20 @@ select.form-input { appearance:none; -webkit-appearance:none; }
         <div class="icon-preview-hint" id="iconHint">Agrega tu primera transacción para desbloquear el ícono de la <strong>moneda dorada</strong>! 🪙</div>
       </div>
       <!-- Upload buttons -->
+      <!-- Hidden file inputs outside the buttons (iOS Safari fix) -->
+      <input type="file" id="fileInputEmpty"  accept="image/*" style="display:none" onchange="uploadIcon(event,'empty')">
+      <input type="file" id="fileInputActive" accept="image/*" style="display:none" onchange="uploadIcon(event,'active')">
       <div class="icon-upload-row">
-        <label class="icon-upload-btn">
+        <button class="icon-upload-btn" type="button" onclick="document.getElementById('fileInputEmpty').click()">
           <span class="icon-upload-emoji">😴</span>
           <span class="icon-upload-label">Ícono inactivo<br>(sin datos)</span>
           <span class="icon-upload-sub">Toca para cambiar</span>
-          <input type="file" accept="image/*" onchange="uploadIcon(event,'empty')">
-        </label>
-        <label class="icon-upload-btn">
+        </button>
+        <button class="icon-upload-btn" type="button" onclick="document.getElementById('fileInputActive').click()">
           <span class="icon-upload-emoji">🔥</span>
           <span class="icon-upload-label">Ícono activo<br>(con datos)</span>
           <span class="icon-upload-sub">Toca para cambiar</span>
-          <input type="file" accept="image/*" onchange="uploadIcon(event,'active')">
-        </label>
+        </button>
       </div>
       <button class="icon-reset-btn" onclick="resetIcons()">↺ Restaurar íconos originales</button>
     </div>

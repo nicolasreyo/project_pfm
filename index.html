@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="FinTrack">
+<meta name="apple-mobile-web-app-title" content="PFM">
 <meta name="theme-color" content="#1e3a8a">
-<title>FinTrack — Personal Finance</title>
+<title>PFM</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="manifest" href="./manifest.json">
@@ -278,7 +278,7 @@ select.form-input { appearance:none; -webkit-appearance:none; }
   <div class="hero">
     <div class="hero-topbar">
       <div>
-        <div class="app-name">FinTrack</div>
+        <div class="app-name">PFM</div>
         <div class="hero-greeting" id="heroGreet">Good morning 👋</div>
       </div>
       <div class="hero-avatar">
@@ -476,7 +476,7 @@ select.form-input { appearance:none; -webkit-appearance:none; }
 
     <div class="mail-field">
       <div class="mail-field-label">Subject</div>
-      <input class="mail-input" id="mailSubject" type="text" placeholder="FinTrack — Monthly Report">
+      <input class="mail-input" id="mailSubject" type="text" placeholder="PFM — Monthly Report">
     </div>
 
     <div class="mail-field">
@@ -1131,7 +1131,7 @@ function exportCSV() {
     S.tx.map(function(t){ return t.date+','+t.type+',"'+(t.desc||'')+'","'+(t.cat||'')+'",'+t.amount; }).join('\n');
   var a = document.createElement('a');
   a.href     = URL.createObjectURL(new Blob([rows],{type:'text/csv'}));
-  a.download = 'fintrack.csv';
+  a.download = 'pfm.csv';
   a.click();
   toast('CSV exported ✓');
 }
@@ -1199,7 +1199,7 @@ function copyForClaude() {
     : '  No budget set';
 
   var text = [
-    '# FinTrack — Financial Data Export',
+    '# PFM — Financial Data Export',
     'Exported: ' + new Date().toLocaleString(),
     '',
     '## OVERALL SUMMARY',
@@ -1266,7 +1266,7 @@ function openMailModal() {
   var lastDay  = new Date(now.getFullYear(), now.getMonth()+1, 0).toISOString().slice(0,10);
   document.getElementById('mailFrom').value    = firstDay;
   document.getElementById('mailTo2').value     = lastDay;
-  document.getElementById('mailSubject').value = 'FinTrack — ' + now.toLocaleString('default',{month:'long',year:'numeric'}) + ' Report';
+  document.getElementById('mailSubject').value = 'PFM — ' + now.toLocaleString('default',{month:'long',year:'numeric'}) + ' Report';
   document.getElementById('mailTo').value      = '';
   updateMailPreview();
   // Live preview on any change
@@ -1295,7 +1295,7 @@ function buildMailBody() {
   var net = inc - exp;
 
   var lines = [];
-  lines.push('FinTrack Transaction Report');
+  lines.push('PFM Transaction Report');
   lines.push('Period: ' + (from||'—') + ' to ' + (to2||'—'));
   lines.push('Generated: ' + new Date().toLocaleDateString());
   lines.push('');
@@ -1348,7 +1348,7 @@ function buildMailBody() {
   }
 
   lines.push('');
-  lines.push('— Sent from FinTrack PWA');
+  lines.push('— Sent from PFM PWA');
   return lines.join('\n');
 }
 
@@ -1360,7 +1360,7 @@ function updateMailPreview() {
 
 function sendToGmail() {
   var toAddr  = document.getElementById('mailTo').value.trim();
-  var subject = document.getElementById('mailSubject').value.trim() || 'FinTrack Report';
+  var subject = document.getElementById('mailSubject').value.trim() || 'PFM Report';
   var body    = buildMailBody();
 
   if (!toAddr) { toast('Enter your Gmail address ⚠️'); return; }

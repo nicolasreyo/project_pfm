@@ -1,6 +1,6 @@
 {
-  "name": "FinTrack",
-  "short_name": "FinTrack",
+  "name": "PFM",
+  "short_name": "PFM",
   "description": "Personal finance tracker",
   "start_url": "./index.html",
   "display": "standalone",

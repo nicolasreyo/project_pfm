@@ -336,7 +336,7 @@ select.form-input { appearance:none; -webkit-appearance:none; }
 
     <div class="icon-preview-card">
       <div class="icon-preview-title">🎮 Personalizar Ícono</div>
-      <div class="icon-preview-row">
+      <div class="icon-preview-row" style="justify-content:center">
         <div class="icon-thumb-wrap" id="iconWrapEmpty">
           <div class="icon-thumb" id="iconThumbEmpty"><img src="./icon-empty.jpg" alt="empty"></div>
           <div class="icon-thumb-lbl">No data</div>
@@ -345,7 +345,6 @@ select.form-input { appearance:none; -webkit-appearance:none; }
           <div class="icon-thumb" id="iconThumbActive"><img src="./icon-active.jpg" alt="active"></div>
           <div class="icon-thumb-lbl">Tracking!</div>
         </div>
-        <div class="icon-preview-hint" id="iconHint">Agrega tu primera transacción para desbloquear el ícono de la <strong>moneda dorada</strong>! 🪙</div>
       </div>
     </div>
 
@@ -650,14 +649,8 @@ function updateIconState() {
   var hasData = S.tx.length > 0;
   var wrapEmpty  = document.getElementById('iconWrapEmpty');
   var wrapActive = document.getElementById('iconWrapActive');
-  var hint       = document.getElementById('iconHint');
   wrapEmpty.style.display  = hasData ? 'none' : '';
   wrapActive.style.display = hasData ? '' : 'none';
-  if (hasData) {
-    hint.innerHTML = '<strong>¡Ícono activo desbloqueado! 🎉</strong><br>Instala en Safari → Compartir ⬆ → "Agregar a inicio".';
-  } else {
-    hint.innerHTML = 'Agrega tu primera transacción para desbloquear el ícono activo. ¡O sube el tuyo! 👆';
-  }
   rebuildManifest();
 }
 

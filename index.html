@@ -1151,8 +1151,7 @@ function copyForClaude() {
   var cm = {};
   S.tx.filter(function(t){ return t.type==='expense'; }).forEach(function(t){ cm[t.cat]=(cm[t.cat]||0)+t.amount; });
   var catLines = Object.entries(cm).sort(function(a,b){ return b[1]-a[1]; })
-    .map(function(kv){ return '  ' + kv[0] + ': $' + kv[1].toFixed(2) + ' (' + ((kv[1]/exp)*100).toFixed(0) + '%)'; }).join('
-');
+    .map(function(kv){ return '  ' + kv[0] + ': $' + kv[1].toFixed(2) + ' (' + ((kv[1]/exp)*100).toFixed(0) + '%)'; }).join('\n');
 
   // Monthly trend (last 6 months)
   var trendLines = [];
@@ -1172,13 +1171,11 @@ function copyForClaude() {
   var txLines = sorted.map(function(t){
     var sign = t.type === 'income' ? '+' : '-';
     return '  ' + t.date + '  ' + sign + '$' + t.amount.toFixed(2) + '  [' + (t.cat||'—') + ']  ' + (t.desc||'');
-  }).join('
-');
+  }).join('\n');
 
   // Recurring summary
   var recurLines = S.recur.length
-    ? S.recur.map(function(r){ return '  ' + r.name + ' · ' + (r.type==='income'?'+':'-') + '$' + r.amount.toFixed(2) + ' ' + r.freq; }).join('
-')
+    ? S.recur.map(function(r){ return '  ' + r.name + ' · ' + (r.type==='income'?'+':'-') + '$' + r.amount.toFixed(2) + ' ' + r.freq; }).join('\n')
     : '  None';
 
   // Budget info
@@ -1187,8 +1184,7 @@ function copyForClaude() {
         var mo = kv[0], limit = kv[1];
         var spent = S.tx.filter(function(t){ return t.date.startsWith(mo) && t.type==='expense'; }).reduce(function(s,t){ return s+t.amount; },0);
         return '  ' + mo + ': $' + spent.toFixed(0) + ' spent of $' + limit.toFixed(0) + ' budget (' + ((spent/limit)*100).toFixed(0) + '%)';
-      }).join('
-')
+      }).join('\n')
     : '  No budget set';
 
   var text = [
@@ -1205,8 +1201,7 @@ function copyForClaude() {
     catLines || '  No expense data',
     '',
     '## 6-MONTH TREND',
-    trendLines.length ? trendLines.join('
-') : '  Not enough data',
+    trendLines.length ? trendLines.join('\n') : '  Not enough data',
     '',
     '## BUDGET TRACKING',
     budgetLines,
@@ -1221,8 +1216,7 @@ function copyForClaude() {
     '',
     '---',
     'Paste this into Claude and ask: "Analyze my expenses, find patterns, and give me 3 actionable savings tips."'
-  ].join('
-');
+  ].join('\n');
 
   // Copy to clipboard
   if (navigator.clipboard && navigator.clipboard.writeText) {

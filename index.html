@@ -103,6 +103,8 @@ body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); 
 .tx-amount.expense { color:var(--red); }
 .tx-del { width:24px; height:24px; border-radius:7px; border:1px solid var(--border); background:none; color:var(--text3); font-size:11px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
 .tx-del:active { background:rgba(239,68,68,0.1); border-color:var(--red-light); color:var(--red-light); }
+.tx-edit { width:24px; height:24px; border-radius:7px; border:1px solid var(--border); background:none; color:var(--red-light); font-size:11px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+.tx-edit:active { background:rgba(239,68,68,0.1); border-color:var(--red-light); }
 .empty { text-align:center; padding:36px 20px; color:var(--text2); }
 .empty .e-icon { font-size:38px; margin-bottom:12px; }
 .empty p { font-size:14px; line-height:1.6; }
@@ -200,7 +202,14 @@ select.form-input { appearance:none; -webkit-appearance:none; }
 .btn-add:active { opacity:0.85; transform:scale(0.98); }
 
 /* History / CSV */
-.export-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; gap:10px; }
+.export-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; gap:10px; }
+.filter-section { margin-bottom:14px; display:flex; flex-direction:column; gap:8px; }
+.filter-row { display:flex; flex-direction:column; gap:4px; }
+.filter-label { font-size:11px; font-weight:700; color:var(--text3); text-transform:uppercase; letter-spacing:0.05em; }
+.filter-chips { display:flex; flex-wrap:wrap; gap:6px; }
+.filter-chip { padding:5px 12px; border-radius:99px; border:1.5px solid var(--border); background:white; color:var(--text2); font-size:12px; font-weight:600; cursor:pointer; transition:all 0.15s; }
+.filter-chip.active { background:var(--accent); border-color:var(--accent); color:white; }
+.filter-clear { font-size:12px; font-weight:600; color:var(--accent); background:none; border:none; cursor:pointer; padding:0; align-self:flex-end; }
 .export-row-right { display:flex; gap:8px; }
 .btn-export { padding:9px 16px; border-radius:10px; border:1.5px solid var(--border); background:white; color:var(--text); font-family:'Inter',sans-serif; font-weight:600; font-size:13px; cursor:pointer; display:flex; align-items:center; gap:6px; transition:all 0.2s; }
 .btn-export:active { opacity:0.7; }
@@ -294,6 +303,7 @@ select.form-input { appearance:none; -webkit-appearance:none; }
         <div class="streak-text" id="streakText">0 day streak</div>
         <div class="streak-sub"  id="streakSub">Add a transaction to start!</div>
       </div>
+      <img id="streakIcon" src="./icon-empty.jpg" style="width:36px;height:36px;border-radius:10px;object-fit:cover;margin-left:6px;flex-shrink:0;">
     </div>
     <div class="balance-label">Total Balance</div>
     <div class="balance-row">
@@ -334,37 +344,30 @@ select.form-input { appearance:none; -webkit-appearance:none; }
       </div>
     </div>
 
-    <div class="icon-preview-card">
-      <div class="icon-preview-title">🎮 Personalizar Ícono</div>
-      <div class="icon-preview-row" style="justify-content:center">
-        <div class="icon-thumb-wrap" id="iconWrapEmpty">
-          <div class="icon-thumb" id="iconThumbEmpty"><img src="./icon-empty.jpg" alt="empty"></div>
-          <div class="icon-thumb-lbl">No data</div>
-        </div>
-        <div class="icon-thumb-wrap" id="iconWrapActive" style="display:none">
-          <div class="icon-thumb" id="iconThumbActive"><img src="./icon-active.jpg" alt="active"></div>
-          <div class="icon-thumb-lbl">Tracking!</div>
-        </div>
-      </div>
-    </div>
-
     <div class="install-banner" id="installBanner">
       <button class="ib-close" onclick="document.getElementById('installBanner').classList.remove('show')">×</button>
       <div class="ib-title">📱 Add to Home Screen</div>
       <div class="ib-text">In <strong>Safari</strong>: tap <strong>Share ⬆</strong> → <strong>"Add to Home Screen"</strong>. Install after adding data to get the gold icon!</div>
     </div>
 
-    <button class="add-tx-cta" onclick="goTo('add')">
-      <div class="add-tx-icon-wrap"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="#1d4ed8" stroke-width="2.5" stroke-linecap="round"/></svg></div>
-      <span class="add-tx-text">Add Transaction Manually</span>
-    </button>
-
     <div class="month-row" id="monthRow"></div>
 
     <div class="trend-card">
-      <div class="trend-top"><div class="trend-title">Balance Trend</div><div class="trend-badge">Last 7 days</div></div>
-      <canvas id="trendChart" height="120" style="display:none"></canvas>
+      <div class="trend-top"><div class="trend-title">Daily Spending</div><div class="trend-badge">This month</div></div>
+      <canvas id="dailyChart" style="display:none;width:100%"></canvas>
       <div class="no-data" id="noDataMsg">Add transactions to see your trend 📈</div>
+    </div>
+
+    <div class="trend-card" style="margin-top:0">
+      <div class="trend-top"><div class="trend-title">Spending by Category</div><div class="trend-badge">This month</div></div>
+      <canvas id="trendChart" style="display:none;width:100%"></canvas>
+      <div class="no-data" id="noDataMsg2">Add transactions to see breakdown 📊</div>
+    </div>
+
+    <div class="trend-card" style="margin-top:0">
+      <div class="trend-top"><div class="trend-title">Category Treemap</div><div class="trend-badge">This month</div></div>
+      <canvas id="treemapChart" style="display:none;width:100%"></canvas>
+      <div class="no-data" id="noDataMsg3">Add transactions to see treemap 🗺</div>
     </div>
 
     <div class="budget-card">
@@ -401,6 +404,7 @@ select.form-input { appearance:none; -webkit-appearance:none; }
     <div class="form-row"><div class="form-label">Description</div><input class="form-input" id="txDesc" type="text" placeholder="e.g. Groceries, Salary..."></div>
     <div class="form-row"><div class="form-label">Amount ($)</div><input class="form-input" id="txAmount" type="number" placeholder="0.00" min="0" step="0.01"></div>
     <div class="form-row"><div class="form-label">Category</div><div class="cats" id="catChips"></div></div>
+    <div class="form-row"><div class="form-label">Metodo</div><div class="cats" id="metodoChips"></div></div>
     <div class="form-row"><div class="form-label">Date</div><input class="form-input" id="txDate" type="date"></div>
     <button class="btn-add" onclick="addTx()">Add Transaction</button>
   </div>
@@ -425,6 +429,21 @@ select.form-input { appearance:none; -webkit-appearance:none; }
           Copy for Claude
         </button>
       </div>
+    </div>
+    <div class="filter-section">
+      <div class="filter-row">
+        <div class="filter-label">Type</div>
+        <div class="filter-chips" id="fTypeChips"></div>
+      </div>
+      <div class="filter-row">
+        <div class="filter-label">Category</div>
+        <div class="filter-chips" id="fCatChips"></div>
+      </div>
+      <div class="filter-row">
+        <div class="filter-label">Metodo</div>
+        <div class="filter-chips" id="fMetodoChips"></div>
+      </div>
+      <button class="filter-clear" onclick="clearFilters()">✕ Clear filters</button>
     </div>
     <div class="tx-list" id="allList"></div>
   </div>
@@ -458,8 +477,43 @@ select.form-input { appearance:none; -webkit-appearance:none; }
   <button class="bnav-btn active" id="nav-dashboard" onclick="goTo('dashboard')"><span class="bnav-icon">🏠</span>Home</button>
   <button class="bnav-btn"        id="nav-add"       onclick="goTo('add')"><span class="bnav-icon">➕</span>Add</button>
   <button class="bnav-btn"        id="nav-history"   onclick="goTo('history')"><span class="bnav-icon">📋</span>History</button>
-  <button class="bnav-btn"        id="nav-reports"   onclick="goTo('reports')"><span class="bnav-icon">📊</span>Reports</button>
 </nav>
+
+<!-- EDIT TRANSACTION MODAL -->
+<div class="mail-modal-bg" id="editModal" onclick="handleEditBgClick(event)">
+  <div class="mail-modal">
+    <button class="modal-close" onclick="closeEditModal()">×</button>
+    <div class="mail-modal-title">✏️ Edit Transaction</div>
+    <div class="form-row" style="margin-top:16px">
+      <div class="form-label">Type</div>
+      <div class="type-row">
+        <button class="type-btn" id="editTypExp" onclick="setEditType('expense')">Expense</button>
+        <button class="type-btn" id="editTypInc" onclick="setEditType('income')">Income</button>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-label">Category</div>
+      <div class="cats" id="editCatChips"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-label">Metodo</div>
+      <div class="cats" id="editMetodoChips"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-label">Description</div>
+      <input class="form-input" id="editDesc" type="text" placeholder="Optional description">
+    </div>
+    <div class="form-row">
+      <div class="form-label">Amount</div>
+      <input class="form-input" id="editAmount" type="number" min="0" step="0.01" placeholder="0.00">
+    </div>
+    <div class="form-row">
+      <div class="form-label">Date</div>
+      <input class="form-input" id="editDate" type="date">
+    </div>
+    <button class="submit-btn" onclick="saveEdit()" style="margin-top:8px">Save Changes</button>
+  </div>
+</div>
 
 <!-- GMAIL MODAL -->
 <div class="mail-modal-bg" id="mailModal" onclick="handleMailBgClick(event)">
@@ -544,8 +598,9 @@ select.form-input { appearance:none; -webkit-appearance:none; }
 
 <script>
 // ── CONSTANTS ──
+var METODOS = ['🔵 Blue','🟣 Purple','🟠 Orange','🔴 Red','🟢 Green'];
 var CATS = {
-  expense: ['🍔 Food','🏠 Rent','🚗 Transport','💊 Health','🛍 Shopping','🎬 Entertainment','📱 Bills','📦 Other'],
+  expense: ['🍔 Food','🏠 Rent','🚗 Transport','💊 Health','🛍 Shopping','🎬 Entertainment','📱 Bills','💪 Gym','🔄 Subscription','📦 Other'],
   income:  ['💼 Salary','💰 Freelance','📈 Investment','🎁 Gift','💵 Other']
 };
 var CAT_COLORS = ['#111111','#1d4ed8','#3b82f6','#777777','#999999','#1e40af','#3b82f6','#60a5fa'];
@@ -568,6 +623,7 @@ function save() { localStorage.setItem('ft_v4', JSON.stringify(S)); }
 
 var cType  = 'expense';
 var cCat   = '';
+var cMetodo = '';
 var rType  = 'expense';
 var rCat   = '';
 var hidden = false;
@@ -647,10 +703,8 @@ function rebuildManifest() {
 // ── ICON STATE ──
 function updateIconState() {
   var hasData = S.tx.length > 0;
-  var wrapEmpty  = document.getElementById('iconWrapEmpty');
-  var wrapActive = document.getElementById('iconWrapActive');
-  wrapEmpty.style.display  = hasData ? 'none' : '';
-  wrapActive.style.display = hasData ? '' : 'none';
+  var img = document.getElementById('streakIcon');
+  if (img) img.src = hasData ? './icon-active.jpg' : './icon-empty.jpg';
   rebuildManifest();
 }
 
@@ -797,7 +851,9 @@ function renderDash() {
   bar.style.width = pct + '%';
   bar.className   = 'bar-fill' + (pct >= 100 ? ' over' : pct >= 80 ? ' warn' : '');
 
+  drawDailyLine(txs);
   drawTrend(txs);
+  drawTreemap(txs);
   renderRecurList();
 
   // Recent (last 5)
@@ -815,63 +871,212 @@ function renderDash() {
   checkMilestones();
 }
 
-// ── TREND CHART ──
-function drawTrend(txs) {
-  var canvas = document.getElementById('trendChart');
+// ── DAILY SPENDING LINE CHART ──
+function drawDailyLine(txs) {
+  var canvas = document.getElementById('dailyChart');
   var noMsg  = document.getElementById('noDataMsg');
-  if (!txs.length) { canvas.style.display='none'; noMsg.style.display='block'; return; }
+  var exps   = txs.filter(function(t){ return t.type === 'expense'; });
+  if (!exps.length) { canvas.style.display='none'; noMsg.style.display='block'; return; }
   canvas.style.display='block'; noMsg.style.display='none';
-  var W = canvas.parentElement.offsetWidth, H = 120;
+
+  // Build daily totals for this month
+  var month = cMonth;
+  var daysInMonth = new Date(parseInt(month.slice(0,4)), parseInt(month.slice(5,7)), 0).getDate();
+  var labels = [], vals = [];
+  for (var d = 1; d <= daysInMonth; d++) {
+    var ds = month + '-' + (d < 10 ? '0' : '') + d;
+    labels.push(d);
+    vals.push(exps.filter(function(t){ return t.date === ds; }).reduce(function(s,t){ return s+t.amount; }, 0));
+  }
+  // Drop trailing zeros for cleaner look
+  while (vals.length > 1 && vals[vals.length-1] === 0) { vals.pop(); labels.pop(); }
+
+  var W   = canvas.parentElement.clientWidth - 40;
+  var H   = 120;
   var dpr = window.devicePixelRatio || 1;
   canvas.width  = W * dpr; canvas.height = H * dpr;
   canvas.style.width = W+'px'; canvas.style.height = H+'px';
   var ctx = canvas.getContext('2d');
   ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, W, H);
 
-  var labels = [], vals = [], now = new Date();
-  for (var i = 6; i >= 0; i--) {
-    var d  = new Date(now); d.setDate(d.getDate()-i);
-    var ds = d.toISOString().slice(0,10);
-    labels.push(d.toLocaleDateString('en-US',{weekday:'short'}));
-    var dayInc = txs.filter(function(t){ return t.date===ds && t.type==='income'; }).reduce(function(s,t){ return s+t.amount; }, 0);
-    var dayExp = txs.filter(function(t){ return t.date===ds && t.type==='expense'; }).reduce(function(s,t){ return s+t.amount; }, 0);
-    vals.push(dayInc - dayExp);
-  }
-  var cum = [], run = 0;
-  vals.forEach(function(v){ run += v; cum.push(run); });
-
-  var pad = {t:10,b:28,l:8,r:8};
+  var pad = {t:10, b:24, l:36, r:8};
   var cW  = W - pad.l - pad.r, cH = H - pad.t - pad.b;
-  var minV = Math.min.apply(null, cum.concat([0]));
-  var maxV = Math.max.apply(null, cum.concat([0]));
-  var range = maxV - minV || 1;
-  var gx = function(i){ return pad.l + (i/(cum.length-1))*cW; };
-  var gy = function(v){ return pad.t + (1-(v-minV)/range)*cH; };
+  var maxV = Math.max.apply(null, vals.concat([1]));
+  var n    = labels.length;
+  var gx   = function(i){ return pad.l + (n > 1 ? (i / (n-1)) * cW : cW/2); };
+  var gy   = function(v){ return pad.t + (1 - v/maxV) * cH; };
 
-  var grad = ctx.createLinearGradient(0,pad.t,0,H);
-  grad.addColorStop(0,'rgba(37,99,235,0.12)');
-  grad.addColorStop(1,'rgba(37,99,235,0)');
-  ctx.beginPath(); ctx.moveTo(gx(0),gy(cum[0]));
-  for (var j = 1; j < cum.length; j++) {
-    var cx2 = (gx(j-1)+gx(j))/2;
-    ctx.bezierCurveTo(cx2,gy(cum[j-1]),cx2,gy(cum[j]),gx(j),gy(cum[j]));
-  }
-  ctx.lineTo(gx(cum.length-1),H-pad.b); ctx.lineTo(gx(0),H-pad.b); ctx.closePath();
-  ctx.fillStyle=grad; ctx.fill();
+  // Y-axis labels
+  ctx.fillStyle = '#94a3b8'; ctx.font = '500 9px Inter,sans-serif'; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+  [0, maxV/2, maxV].forEach(function(v){ ctx.fillText('$'+Math.round(v), pad.l - 4, gy(v)); });
 
-  ctx.beginPath(); ctx.moveTo(gx(0),gy(cum[0]));
-  for (var k = 1; k < cum.length; k++) {
-    var cx3 = (gx(k-1)+gx(k))/2;
-    ctx.bezierCurveTo(cx3,gy(cum[k-1]),cx3,gy(cum[k]),gx(k),gy(cum[k]));
-  }
-  ctx.strokeStyle='#2563eb'; ctx.lineWidth=2.5; ctx.lineJoin='round'; ctx.stroke();
-
-  cum.forEach(function(v,i){
-    ctx.beginPath(); ctx.arc(gx(i),gy(v),4,0,Math.PI*2); ctx.fillStyle='#2563eb'; ctx.fill();
-    ctx.beginPath(); ctx.arc(gx(i),gy(v),2,0,Math.PI*2); ctx.fillStyle='white';   ctx.fill();
+  // Grid lines
+  ctx.strokeStyle = 'rgba(148,163,184,0.2)'; ctx.lineWidth = 1;
+  [0, maxV/2, maxV].forEach(function(v){
+    ctx.beginPath(); ctx.moveTo(pad.l, gy(v)); ctx.lineTo(W - pad.r, gy(v)); ctx.stroke();
   });
-  ctx.fillStyle='#94a3b8'; ctx.font='600 10px Inter,sans-serif'; ctx.textAlign='center';
-  labels.forEach(function(l,i){ ctx.fillText(l, gx(i), H-8); });
+
+  // Area fill
+  var grad = ctx.createLinearGradient(0, pad.t, 0, H - pad.b);
+  grad.addColorStop(0, 'rgba(37,99,235,0.15)');
+  grad.addColorStop(1, 'rgba(37,99,235,0)');
+  ctx.beginPath(); ctx.moveTo(gx(0), gy(vals[0]));
+  for (var i = 1; i < n; i++) {
+    var cx1 = (gx(i-1)+gx(i))/2;
+    ctx.bezierCurveTo(cx1, gy(vals[i-1]), cx1, gy(vals[i]), gx(i), gy(vals[i]));
+  }
+  ctx.lineTo(gx(n-1), H-pad.b); ctx.lineTo(gx(0), H-pad.b); ctx.closePath();
+  ctx.fillStyle = grad; ctx.fill();
+
+  // Line
+  ctx.beginPath(); ctx.moveTo(gx(0), gy(vals[0]));
+  for (var j = 1; j < n; j++) {
+    var cx2 = (gx(j-1)+gx(j))/2;
+    ctx.bezierCurveTo(cx2, gy(vals[j-1]), cx2, gy(vals[j]), gx(j), gy(vals[j]));
+  }
+  ctx.strokeStyle = '#2563eb'; ctx.lineWidth = 2; ctx.stroke();
+
+  // X-axis day labels (every ~5 days)
+  ctx.fillStyle = '#94a3b8'; ctx.font = '500 9px Inter,sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  labels.forEach(function(lbl, i){
+    if (lbl === 1 || lbl % 5 === 0) ctx.fillText(lbl, gx(i), H - pad.b + 4);
+  });
+}
+
+// ── TREEMAP ──
+function drawTreemap(txs) {
+  var canvas = document.getElementById('treemapChart');
+  var noMsg  = document.getElementById('noDataMsg3');
+  var exps   = txs.filter(function(t){ return t.type === 'expense'; });
+  if (!exps.length) { canvas.style.display='none'; noMsg.style.display='block'; return; }
+  canvas.style.display='block'; noMsg.style.display='none';
+
+  var cm = {};
+  exps.forEach(function(t){ cm[t.cat] = (cm[t.cat]||0) + t.amount; });
+  var cats = Object.entries(cm).sort(function(a,b){ return b[1]-a[1]; });
+  var total = cats.reduce(function(s,kv){ return s+kv[1]; }, 0) || 1;
+
+  var BAR_COLORS = ['#1d4ed8','#7c3aed','#f97316','#dc2626','#16a34a','#0891b2','#d97706','#6b7280','#ec4899','#10b981'];
+
+  var W   = canvas.parentElement.clientWidth - 40;
+  var H   = 160;
+  var dpr = window.devicePixelRatio || 1;
+  canvas.width  = W * dpr; canvas.height = H * dpr;
+  canvas.style.width = W+'px'; canvas.style.height = H+'px';
+  var ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, W, H);
+
+  // Simple squarified-style: layout rects row by row
+  function layoutRow(items, x, y, w, h) {
+    var rowTotal = items.reduce(function(s,it){ return s+it.val; }, 0);
+    var cx = x;
+    items.forEach(function(it) {
+      var rw = (it.val / rowTotal) * w;
+      it.rect = {x:cx, y:y, w:rw, h:h};
+      cx += rw;
+    });
+  }
+  var nodes = cats.map(function(kv, i){ return {cat:kv[0], val:kv[1], color:BAR_COLORS[i%BAR_COLORS.length]}; });
+  var remaining = nodes.slice(), x=0, y=0, w=W, h=H, gap=3;
+
+  while (remaining.length) {
+    var rowH2 = remaining.length > 1 ? Math.round((remaining[0].val / total) * H * 2.5) : h;
+    rowH2 = Math.min(Math.max(rowH2, 30), h);
+    var rowItems = [], restH = h;
+    var used = 0;
+    while (remaining.length && used < w * 0.7) {
+      var it = remaining.shift();
+      rowItems.push(it);
+      used += (it.val/total)*W;
+    }
+    layoutRow(rowItems, x, y, w, rowH2);
+    y += rowH2 + gap; h -= rowH2 + gap;
+    if (h <= 0) break;
+  }
+
+  nodes.forEach(function(node) {
+    if (!node.rect) return;
+    var r = node.rect;
+    if (r.w < 4 || r.h < 4) return;
+    ctx.fillStyle = node.color;
+    ctx.beginPath(); ctx.roundRect(r.x + gap/2, r.y, r.w - gap, r.h, 8); ctx.fill();
+
+    if (r.w > 40 && r.h > 22) {
+      ctx.fillStyle = 'rgba(255,255,255,0.92)';
+      ctx.font = 'bold 11px Inter,sans-serif';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      var label = node.cat.split(' ').slice(1).join(' ') || node.cat;
+      if (label.length > 10) label = label.slice(0,9)+'…';
+      ctx.fillText(label, r.x + r.w/2, r.y + r.h/2 - 7);
+      ctx.font = '600 10px Outfit,sans-serif';
+      ctx.fillText('$'+node.val.toFixed(0), r.x + r.w/2, r.y + r.h/2 + 7);
+    }
+  });
+}
+
+// ── CATEGORY BAR CHART ──
+function drawTrend(txs) {
+  var canvas = document.getElementById('trendChart');
+  var noMsg  = document.getElementById('noDataMsg2');
+  var exps   = txs.filter(function(t){ return t.type === 'expense'; });
+  if (!exps.length) { canvas.style.display='none'; noMsg.style.display='block'; return; }
+  canvas.style.display='block'; noMsg.style.display='none';
+
+  // Aggregate by category
+  var cm = {};
+  exps.forEach(function(t){ cm[t.cat] = (cm[t.cat]||0) + t.amount; });
+  var cats = Object.entries(cm).sort(function(a,b){ return b[1]-a[1]; });
+  var maxVal = cats[0][1] || 1;
+
+  var BAR_COLORS = ['#1d4ed8','#7c3aed','#f97316','#dc2626','#16a34a','#0891b2','#d97706','#6b7280','#ec4899','#10b981'];
+
+  var W   = canvas.parentElement.clientWidth - 40;
+  var H   = Math.max(cats.length * 36 + 16, 80);
+  var dpr = window.devicePixelRatio || 1;
+  canvas.width  = W * dpr; canvas.height = H * dpr;
+  canvas.style.width = W+'px'; canvas.style.height = H+'px';
+  var ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, W, H);
+
+  var labelW = 100, amtW = 50, padR = 8;
+  var barAreaW = W - labelW - amtW - padR;
+  var rowH = 36, barH = 16;
+
+  cats.forEach(function(kv, i) {
+    var cat = kv[0], val = kv[1];
+    var y    = i * rowH + 8;
+    var barW = Math.max((val / maxVal) * barAreaW, 4);
+    var color = BAR_COLORS[i % BAR_COLORS.length];
+
+    // Category label
+    ctx.fillStyle = '#64748b';
+    ctx.font = '600 11px Inter,sans-serif';
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+    var label = cat.length > 11 ? cat.slice(0,11)+'…' : cat;
+    ctx.fillText(label, labelW - 6, y + barH / 2);
+
+    // Bar background track
+    ctx.fillStyle = 'rgba(37,99,235,0.07)';
+    ctx.beginPath();
+    ctx.roundRect(labelW, y, barAreaW, barH, 6);
+    ctx.fill();
+
+    // Bar fill
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.roundRect(labelW, y, barW, barH, 6);
+    ctx.fill();
+
+    // Amount label — always right-aligned within its reserved column
+    ctx.fillStyle = '#0f172a';
+    ctx.font = '700 11px Outfit,sans-serif';
+    ctx.textAlign = 'right';
+    ctx.fillText('$'+val.toFixed(0), W - padR, y + barH / 2);
+  });
 }
 
 // ── TX ELEMENT ──
@@ -885,14 +1090,20 @@ function makeTxEl(t, container) {
     '<div class="tx-icon '+t.type+'">'+emo+rb+'</div>' +
     '<div class="tx-info">' +
       '<div class="tx-name">'+(t.desc||t.cat||'Transaction')+'</div>' +
-      '<div class="tx-meta">'+(t.cat||'—')+' · '+dt+'</div>' +
+      '<div class="tx-meta">'+(t.cat||'—')+' · '+dt+(t.metodo?' · '+t.metodo:'')+'</div>' +
     '</div>' +
     '<div class="tx-right">' +
       '<div class="tx-amount '+t.type+'">'+(t.type==='income'?'+':'-')+fmtD(t.amount)+'</div>' +
-      '<button class="tx-del" data-id="'+t.id+'">✕</button>' +
+      '<div style="display:flex;gap:5px">' +
+        '<button class="tx-edit" data-id="'+t.id+'">✎</button>' +
+        '<button class="tx-del" data-id="'+t.id+'">✕</button>' +
+      '</div>' +
     '</div>';
   el.querySelector('.tx-del').addEventListener('click', function(){
     delTx(this.getAttribute('data-id'));
+  });
+  el.querySelector('.tx-edit').addEventListener('click', function(){
+    openEditModal(this.getAttribute('data-id'));
   });
   container.appendChild(el);
 }
@@ -914,6 +1125,16 @@ function renderCats() {
     el.appendChild(c);
   });
 }
+function renderMetodos() {
+  var el = document.getElementById('metodoChips'); el.innerHTML = '';
+  METODOS.forEach(function(m){
+    var c = document.createElement('button');
+    c.className   = 'cat-chip' + (cMetodo === m ? ' active' : '');
+    c.textContent = m;
+    c.onclick     = function(){ cMetodo = m; renderMetodos(); };
+    el.appendChild(c);
+  });
+}
 function addTx() {
   var desc = document.getElementById('txDesc').value.trim();
   var amt  = parseFloat(document.getElementById('txAmount').value);
@@ -921,11 +1142,12 @@ function addTx() {
   if (!amt || amt <= 0) { toast('Enter a valid amount ⚠️'); return; }
   if (!cCat)            { toast('Pick a category ⚠️'); return; }
   var wasEmpty = S.tx.length === 0;
-  S.tx.push({ id: Date.now().toString(), type:cType, desc:desc||cCat, amount:amt, cat:cCat, date:date });
+  S.tx.push({ id: Date.now().toString(), type:cType, desc:desc||cCat, amount:amt, cat:cCat, date:date, metodo:cMetodo });
   save();
   document.getElementById('txDesc').value   = '';
   document.getElementById('txAmount').value = '';
   cCat = ''; renderCats();
+  cMetodo = ''; renderMetodos();
   if (wasEmpty) { launchConfetti(); toast('🎉 First transaction! Gold icon unlocked!'); }
   else           { toast('Transaction added ✓'); }
   goTo('dashboard');
@@ -935,6 +1157,68 @@ function delTx(id) {
   save(); renderDash();
   if (document.getElementById('page-history').classList.contains('active')) renderHistory();
   toast('Deleted');
+}
+
+// ── EDIT TRANSACTION ──
+var editId = null, editType = 'expense', editCat = '', editMetodo = '';
+function openEditModal(id) {
+  var t = S.tx.find(function(x){ return x.id === id; });
+  if (!t) return;
+  editId = id; editType = t.type; editCat = t.cat || ''; editMetodo = t.metodo || '';
+  document.getElementById('editDesc').value   = t.desc   || '';
+  document.getElementById('editAmount').value = t.amount || '';
+  document.getElementById('editDate').value   = t.date   || '';
+  document.getElementById('editTypExp').classList.toggle('active', editType === 'expense');
+  document.getElementById('editTypInc').classList.toggle('active', editType === 'income');
+  renderEditCats(); renderEditMetodos();
+  document.getElementById('editModal').classList.add('open');
+}
+function setEditType(t) {
+  editType = t; editCat = '';
+  document.getElementById('editTypExp').classList.toggle('active', t === 'expense');
+  document.getElementById('editTypInc').classList.toggle('active', t === 'income');
+  renderEditCats();
+}
+function renderEditCats() {
+  var el = document.getElementById('editCatChips'); el.innerHTML = '';
+  CATS[editType].forEach(function(cat){
+    var c = document.createElement('button');
+    c.className = 'cat-chip' + (editCat === cat ? ' active' : '');
+    c.textContent = cat;
+    c.onclick = function(){ editCat = cat; renderEditCats(); };
+    el.appendChild(c);
+  });
+}
+function renderEditMetodos() {
+  var el = document.getElementById('editMetodoChips'); el.innerHTML = '';
+  METODOS.forEach(function(m){
+    var c = document.createElement('button');
+    c.className = 'cat-chip' + (editMetodo === m ? ' active' : '');
+    c.textContent = m;
+    c.onclick = function(){ editMetodo = m; renderEditMetodos(); };
+    el.appendChild(c);
+  });
+}
+function closeEditModal() { document.getElementById('editModal').classList.remove('open'); }
+function handleEditBgClick(e) { if (e.target === document.getElementById('editModal')) closeEditModal(); }
+function saveEdit() {
+  var amt = parseFloat(document.getElementById('editAmount').value);
+  var date = document.getElementById('editDate').value;
+  if (!editCat)        { toast('Pick a category ⚠️'); return; }
+  if (!amt || amt <= 0){ toast('Enter a valid amount ⚠️'); return; }
+  if (!date)           { toast('Pick a date ⚠️'); return; }
+  var t = S.tx.find(function(x){ return x.id === editId; });
+  if (!t) return;
+  t.type   = editType;
+  t.cat    = editCat;
+  t.metodo = editMetodo;
+  t.desc   = document.getElementById('editDesc').value.trim();
+  t.amount = amt;
+  t.date   = date;
+  save(); renderDash();
+  if (document.getElementById('page-history').classList.contains('active')) renderHistory();
+  closeEditModal();
+  toast('Updated ✓');
 }
 
 // ── BUDGET ──
@@ -1029,15 +1313,55 @@ function renderRecurList() {
   });
 }
 
+// ── HISTORY FILTERS ──
+var fType = '', fCat = '', fMetodo = '';
+function renderHistoryFilters() {
+  var types = [['All',''],['Expense','expense'],['Income','income']];
+  var fc = document.getElementById('fTypeChips'); fc.innerHTML = '';
+  types.forEach(function(pair){
+    var c = document.createElement('button');
+    c.className = 'filter-chip' + (fType === pair[1] ? ' active' : '');
+    c.textContent = pair[0];
+    c.onclick = function(){ fType = pair[1]; fCat = ''; renderHistoryFilters(); renderHistory(); };
+    fc.appendChild(c);
+  });
+
+  var allCats = fType ? CATS[fType] : CATS.expense.concat(CATS.income.filter(function(c){ return CATS.expense.indexOf(c) === -1; }));
+  var fcc = document.getElementById('fCatChips'); fcc.innerHTML = '';
+  allCats.forEach(function(cat){
+    var c = document.createElement('button');
+    c.className = 'filter-chip' + (fCat === cat ? ' active' : '');
+    c.textContent = cat;
+    c.onclick = function(){ fCat = (fCat === cat ? '' : cat); renderHistoryFilters(); renderHistory(); };
+    fcc.appendChild(c);
+  });
+
+  var fmc = document.getElementById('fMetodoChips'); fmc.innerHTML = '';
+  METODOS.forEach(function(m){
+    var c = document.createElement('button');
+    c.className = 'filter-chip' + (fMetodo === m ? ' active' : '');
+    c.textContent = m;
+    c.onclick = function(){ fMetodo = (fMetodo === m ? '' : m); renderHistoryFilters(); renderHistory(); };
+    fmc.appendChild(c);
+  });
+}
+function clearFilters() { fType = ''; fCat = ''; fMetodo = ''; renderHistoryFilters(); renderHistory(); }
+
 // ── HISTORY ──
 function renderHistory() {
+  renderHistoryFilters();
   var el = document.getElementById('allList');
   el.innerHTML = '';
-  var sorted = S.tx.slice().reverse();
+  var sorted = S.tx.slice().reverse().filter(function(t){
+    if (fType   && t.type   !== fType)   return false;
+    if (fCat    && t.cat    !== fCat)    return false;
+    if (fMetodo && t.metodo !== fMetodo) return false;
+    return true;
+  });
   var countEl = document.getElementById('historyCount');
   if (countEl) countEl.textContent = sorted.length + ' transaction' + (sorted.length !== 1 ? 's' : '');
   if (!sorted.length) {
-    el.innerHTML = '<div class="empty"><div class="e-icon">📭</div><p>No transactions yet.</p></div>';
+    el.innerHTML = '<div class="empty"><div class="e-icon">📭</div><p>No transactions found.</p></div>';
     return;
   }
   sorted.forEach(function(t){ makeTxEl(t, el); });
@@ -1365,6 +1689,7 @@ function sendToGmail() {
 
 // ── INIT ──
 renderCats();
+renderMetodos();
 renderRCats();
 renderDash();
 checkInstall();

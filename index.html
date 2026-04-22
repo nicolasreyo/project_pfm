@@ -646,56 +646,12 @@ function checkInstall() {
 }
 
 // ── ICON STORAGE KEYS ──
-var EMPTY_ICON_DEFAULT  = document.getElementById('iconThumbEmpty').querySelector('img').src;
-var ACTIVE_ICON_DEFAULT = document.getElementById('iconThumbActive').querySelector('img').src;
-
-// Load custom icons from localStorage if saved
-(function(){
-  var ce = localStorage.getItem('ft_icon_empty');
-  var ca = localStorage.getItem('ft_icon_active');
-  if (ce) document.getElementById('iconThumbEmpty').querySelector('img').src  = ce;
-  if (ca) document.getElementById('iconThumbActive').querySelector('img').src = ca;
-})();
-
-function uploadIcon(event, which) {
-  var file = event.target.files[0];
-  if (!file) return;
-  var reader = new FileReader();
-  reader.onload = function(e) {
-    var dataUrl = e.target.result;
-    if (which === 'empty') {
-      document.getElementById('iconThumbEmpty').querySelector('img').src = dataUrl;
-      localStorage.setItem('ft_icon_empty', dataUrl);
-    } else {
-      document.getElementById('iconThumbActive').querySelector('img').src = dataUrl;
-      localStorage.setItem('ft_icon_active', dataUrl);
-    }
-    // Rebuild manifest with new icon
-    rebuildManifest();
-    toast(which === 'empty' ? '😴 Ícono inactivo actualizado ✓' : '🔥 Ícono activo actualizado ✓');
-    launchConfetti();
-  };
-  reader.readAsDataURL(file);
-  // Reset input so same file can be selected again
-  event.target.value = '';
-}
-
-function resetIcons() {
-  localStorage.removeItem('ft_icon_empty');
-  localStorage.removeItem('ft_icon_active');
-  document.getElementById('iconThumbEmpty').querySelector('img').src  = EMPTY_ICON_DEFAULT;
-  document.getElementById('iconThumbActive').querySelector('img').src = ACTIVE_ICON_DEFAULT;
-  rebuildManifest();
-  toast('↺ Íconos restaurados al original');
-}
+var EMPTY_ICON_DEFAULT  = './icon-empty.jpg';
+var ACTIVE_ICON_DEFAULT = './icon-active.jpg';
 
 function rebuildManifest() {
-  // Static manifest.json handles install icon
-  // Dynamically update apple-touch-icon for iOS preview
   var hasData = S.tx.length > 0;
-  var emptyImg  = document.getElementById('iconThumbEmpty').querySelector('img').src;
-  var activeImg = document.getElementById('iconThumbActive').querySelector('img').src;
-  var icon = hasData ? activeImg : emptyImg;
+  var icon = hasData ? ACTIVE_ICON_DEFAULT : EMPTY_ICON_DEFAULT;
   var atIcon = document.querySelector('link[rel="apple-touch-icon"]');
   if (atIcon) atIcon.href = icon;
 }

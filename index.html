@@ -370,6 +370,12 @@ select.form-input { appearance:none; -webkit-appearance:none; }
       <div class="no-data" id="noDataMsg3">Add transactions to see treemap 🗺</div>
     </div>
 
+    <div class="trend-card" style="margin-top:0">
+      <div class="trend-top"><div class="trend-title">Metodo Detallado</div><div class="trend-badge">This month</div></div>
+      <div id="metodoDetBars"></div>
+      <div class="no-data" id="noDataMsgMetodo" style="display:none">No metodo data yet 💳</div>
+    </div>
+
     <div class="budget-card">
       <div class="budget-title">Monthly Budget</div>
       <div class="budget-nums"><div class="b-spent" id="bSpent">$0 spent</div><div class="b-limit" id="bLimit">of $0 limit</div></div>
@@ -474,11 +480,6 @@ select.form-input { appearance:none; -webkit-appearance:none; }
         <div class="donut-legend" id="donutLegend"></div>
       </div>
       <div id="catBars"></div>
-    </div>
-    <div class="chart-card">
-      <div class="cc-title">Metodo Detallado</div>
-      <div class="cc-sub">Expense distribution by payment method</div>
-      <div id="metodoDetBars"></div>
     </div>
   </div>
 </div>
@@ -842,6 +843,7 @@ function renderDash() {
   drawDailyLine(txs);
   drawTrend(txs);
   drawTreemap(txs);
+  renderMetodoDet(txs.filter(function(t){ return t.type==='expense'; }));
   renderRecurList();
 
   // Recent (last 5)
@@ -1476,8 +1478,6 @@ function renderReports() {
       '<div class="cat-bar-track"><div class="cat-bar-fill" style="width:'+(amt/total*100)+'%;background:'+color+'"></div></div>';
     barsEl.appendChild(d);
   });
-
-  renderMetodoDet(exps);
 }
 
 function renderMetodoDet(exps) {
@@ -1485,23 +1485,22 @@ function renderMetodoDet(exps) {
     '🔵 Blue':'#2563eb','🟣 Purple':'#7c3aed','🟠 Orange':'#f97316',
     '🔴 Red':'#dc2626','🟢 Green':'#16a34a'
   };
-  var el = document.getElementById('metodoDetBars');
+  var el    = document.getElementById('metodoDetBars');
+  var noMsg = document.getElementById('noDataMsgMetodo');
   el.innerHTML = '';
   var mm = {};
   exps.forEach(function(t){ if (t.metodo) mm[t.metodo] = (mm[t.metodo]||0) + t.amount; });
   var sorted = Object.entries(mm).sort(function(a,b){ return b[1]-a[1]; });
-  var total = sorted.reduce(function(s,kv){ return s+kv[1]; }, 0) || 1;
-  if (!sorted.length) {
-    el.innerHTML = '<p style="color:var(--text2);font-size:14px;text-align:center;padding:16px 0">No metodo data yet</p>';
-    return;
-  }
+  var total  = sorted.reduce(function(s,kv){ return s+kv[1]; }, 0) || 1;
+  if (!sorted.length) { el.style.display='none'; noMsg.style.display='block'; return; }
+  el.style.display='block'; noMsg.style.display='none';
   sorted.forEach(function(kv){
     var m = kv[0], amt = kv[1];
     var pct = (amt/total*100).toFixed(1);
     var color = METODO_COLORS[m] || '#64748b';
     var d = document.createElement('div');
     d.innerHTML =
-      '<div class="cat-bar-lbl"><span>'+m+'</span><span>'+fmtD(amt)+' · '+pct+'%</span></div>' +
+      '<div class="cat-bar-lbl"><span>'+m+'</span><span>'+fmtAbbr(amt)+' · '+pct+'%</span></div>' +
       '<div class="cat-bar-track"><div class="cat-bar-fill" style="width:'+(amt/total*100)+'%;background:'+color+'"></div></div>';
     el.appendChild(d);
   });

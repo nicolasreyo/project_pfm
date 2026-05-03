@@ -401,10 +401,12 @@ select.form-input { appearance:none; -webkit-appearance:none; }
       <button class="type-btn expense active" id="typExp" onclick="setType('expense')">▼ Expense</button>
       <button class="type-btn income"          id="typInc" onclick="setType('income')">▲ Income</button>
     </div>
+    <div class="form-row"><div class="form-label">Establecimiento / Tienda</div><input class="form-input" id="txStore" type="text" list="storeList" placeholder="Ej: McDonald's, Éxito, Rappi..." autocomplete="off"></div>
     <div class="form-row"><div class="form-label">Description</div><input class="form-input" id="txDesc" type="text" placeholder="e.g. Groceries, Salary..."></div>
-    <div class="form-row"><div class="form-label">Amount ($)</div><input class="form-input" id="txAmount" type="number" placeholder="0.00" min="0" step="0.01"></div>
+    <div class="form-row"><div class="form-label">Amount</div><input class="form-input" id="txAmount" type="number" placeholder="0" min="0" step="1"></div>
     <div class="form-row"><div class="form-label">Category</div><div class="cats" id="catChips"></div></div>
-    <div class="form-row"><div class="form-label">Metodo</div><div class="cats" id="metodoChips"></div></div>
+    <div class="form-row"><div class="form-label">Metodo General</div><div class="cats" id="metodoGenChips"></div></div>
+    <div class="form-row"><div class="form-label">Metodo Detallado</div><div class="cats" id="metodoChips"></div></div>
     <div class="form-row"><div class="form-label">Date</div><input class="form-input" id="txDate" type="date"></div>
     <button class="btn-add" onclick="addTx()">Add Transaction</button>
   </div>
@@ -440,7 +442,11 @@ select.form-input { appearance:none; -webkit-appearance:none; }
         <div class="filter-chips" id="fCatChips"></div>
       </div>
       <div class="filter-row">
-        <div class="filter-label">Metodo</div>
+        <div class="filter-label">Metodo General</div>
+        <div class="filter-chips" id="fMetodoGenChips"></div>
+      </div>
+      <div class="filter-row">
+        <div class="filter-label">Metodo Detallado</div>
         <div class="filter-chips" id="fMetodoChips"></div>
       </div>
       <button class="filter-clear" onclick="clearFilters()">✕ Clear filters</button>
@@ -496,8 +502,16 @@ select.form-input { appearance:none; -webkit-appearance:none; }
       <div class="cats" id="editCatChips"></div>
     </div>
     <div class="form-row">
-      <div class="form-label">Metodo</div>
+      <div class="form-label">Metodo General</div>
+      <div class="cats" id="editMetodoGenChips"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-label">Metodo Detallado</div>
       <div class="cats" id="editMetodoChips"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-label">Establecimiento / Tienda</div>
+      <input class="form-input" id="editStore" type="text" list="storeList" placeholder="Ej: McDonald's, Éxito..." autocomplete="off">
     </div>
     <div class="form-row">
       <div class="form-label">Description</div>
@@ -505,7 +519,7 @@ select.form-input { appearance:none; -webkit-appearance:none; }
     </div>
     <div class="form-row">
       <div class="form-label">Amount</div>
-      <input class="form-input" id="editAmount" type="number" min="0" step="0.01" placeholder="0.00">
+      <input class="form-input" id="editAmount" type="number" min="0" step="1" placeholder="0">
     </div>
     <div class="form-row">
       <div class="form-label">Date</div>
@@ -596,11 +610,14 @@ select.form-input { appearance:none; -webkit-appearance:none; }
 
 <div class="toast" id="toast"></div>
 
+<datalist id="storeList"></datalist>
+
 <script>
 // ── CONSTANTS ──
-var METODOS = ['🔵 Blue','🟣 Purple','🟠 Orange','🔴 Red','🟢 Green'];
+var METODOS     = ['🔵 Blue','🟣 Purple','🟠 Orange','🔴 Red','🟢 Green'];
+var METODOS_GEN = ['Efectivo','Breb','Tarjeta','PSE'];
 var CATS = {
-  expense: ['🍔 Food','🏠 Rent','🚗 Transport','💊 Health','🛍 Shopping','🎬 Entertainment','📱 Bills','💪 Gym','🔄 Subscription','📦 Other'],
+  expense: ['🍔 Food','🏠 Rent','🚗 Transport','💊 Health','🛍 Shopping','🎬 Entertainment','📱 Bills','💪 Gym','🔄 Subscription','🍺 Bares/Cervezas','📦 Other'],
   income:  ['💼 Salary','💰 Freelance','📈 Investment','🎁 Gift','💵 Other']
 };
 var CAT_COLORS = ['#111111','#1d4ed8','#3b82f6','#777777','#999999','#1e40af','#3b82f6','#60a5fa'];
@@ -621,17 +638,24 @@ if (!S.seenMilestones) S.seenMilestones = [];
 
 function save() { localStorage.setItem('ft_v4', JSON.stringify(S)); }
 
-var cType  = 'expense';
-var cCat   = '';
-var cMetodo = '';
-var rType  = 'expense';
+var cType      = 'expense';
+var cCat       = '';
+var cMetodo    = '';
+var cMetodoGen = '';
+var rType      = 'expense';
 var rCat   = '';
 var hidden = false;
 var cMonth = mStr(new Date());
 
 function mStr(d) { return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0'); }
-function fmt(n)  { return '$' + Math.abs(n).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0}); }
-function fmtD(n) { return '$' + Math.abs(n).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,','); }
+function fmt(n)     { return '$ ' + Math.abs(n).toLocaleString('es-CO',{minimumFractionDigits:0,maximumFractionDigits:0}); }
+function fmtD(n)    { return '$ ' + Math.abs(n).toLocaleString('es-CO',{minimumFractionDigits:0,maximumFractionDigits:0}); }
+function fmtAbbr(n) {
+  var v = Math.abs(n);
+  if (v >= 1000000) return '$ ' + (v/1000000).toLocaleString('es-CO',{minimumFractionDigits:0,maximumFractionDigits:2}) + 'M';
+  if (v >= 1000)    return '$ ' + (v/1000).toLocaleString('es-CO',{minimumFractionDigits:0,maximumFractionDigits:1}) + 'K';
+  return '$ ' + v.toLocaleString('es-CO',{minimumFractionDigits:0,maximumFractionDigits:0});
+}
 
 // ── GREETING ──
 function setGreeting() {
@@ -737,7 +761,10 @@ function goTo(pg) {
   if (pg === 'dashboard') renderDash();
   if (pg === 'history')   renderHistory();
   if (pg === 'reports')   renderReports();
-  if (pg === 'add')       document.getElementById('txDate').value = new Date().toISOString().slice(0,10);
+  if (pg === 'add') {
+    document.getElementById('txDate').value = new Date().toISOString().slice(0,10);
+    populateStoreList();
+  }
   window.scrollTo(0,0);
 }
 
@@ -1045,8 +1072,8 @@ function makeTxEl(t, container) {
   el.innerHTML =
     '<div class="tx-icon '+t.type+'">'+emo+rb+'</div>' +
     '<div class="tx-info">' +
-      '<div class="tx-name">'+(t.desc||t.cat||'Transaction')+'</div>' +
-      '<div class="tx-meta">'+(t.cat||'—')+' · '+dt+(t.metodo?' · '+t.metodo:'')+'</div>' +
+      '<div class="tx-name">'+(t.store||t.desc||t.cat||'Transaction')+'</div>' +
+      '<div class="tx-meta">'+(t.cat||'—')+' · '+dt+(t.metodoGen?' · '+t.metodoGen:'')+(t.metodo?' · '+t.metodo:'')+'</div>' +
     '</div>' +
     '<div class="tx-right">' +
       '<div class="tx-amount '+t.type+'">'+(t.type==='income'?'+':'-')+fmtD(t.amount)+'</div>' +
@@ -1091,18 +1118,41 @@ function renderMetodos() {
     el.appendChild(c);
   });
 }
+function renderMetodosGen() {
+  var el = document.getElementById('metodoGenChips'); el.innerHTML = '';
+  METODOS_GEN.forEach(function(m){
+    var c = document.createElement('button');
+    c.className   = 'cat-chip' + (cMetodoGen === m ? ' active' : '');
+    c.textContent = m;
+    c.onclick     = function(){ cMetodoGen = m; renderMetodosGen(); };
+    el.appendChild(c);
+  });
+}
+function populateStoreList() {
+  var seen = {};
+  S.tx.forEach(function(t){ if (t.store) seen[t.store] = true; });
+  var dl = document.getElementById('storeList');
+  dl.innerHTML = '';
+  Object.keys(seen).forEach(function(s){
+    var opt = document.createElement('option'); opt.value = s; dl.appendChild(opt);
+  });
+}
 function addTx() {
-  var desc = document.getElementById('txDesc').value.trim();
-  var amt  = parseFloat(document.getElementById('txAmount').value);
-  var date = document.getElementById('txDate').value || new Date().toISOString().slice(0,10);
+  var store = document.getElementById('txStore').value.trim();
+  var desc  = document.getElementById('txDesc').value.trim();
+  var amt   = parseFloat(document.getElementById('txAmount').value);
+  var date  = document.getElementById('txDate').value || new Date().toISOString().slice(0,10);
+  if (!store)           { toast('Ingresa el establecimiento ⚠️'); return; }
   if (!amt || amt <= 0) { toast('Enter a valid amount ⚠️'); return; }
   if (!cCat)            { toast('Pick a category ⚠️'); return; }
   var wasEmpty = S.tx.length === 0;
-  S.tx.push({ id: Date.now().toString(), type:cType, desc:desc||cCat, amount:amt, cat:cCat, date:date, metodo:cMetodo });
+  S.tx.push({ id: Date.now().toString(), type:cType, store:store, desc:desc||cCat, amount:amt, cat:cCat, date:date, metodoGen:cMetodoGen, metodo:cMetodo });
   save();
+  document.getElementById('txStore').value  = '';
   document.getElementById('txDesc').value   = '';
   document.getElementById('txAmount').value = '';
   cCat = ''; renderCats();
+  cMetodoGen = ''; renderMetodosGen();
   cMetodo = ''; renderMetodos();
   if (wasEmpty) { launchConfetti(); toast('🎉 First transaction! Gold icon unlocked!'); }
   else           { toast('Transaction added ✓'); }
@@ -1116,17 +1166,19 @@ function delTx(id) {
 }
 
 // ── EDIT TRANSACTION ──
-var editId = null, editType = 'expense', editCat = '', editMetodo = '';
+var editId = null, editType = 'expense', editCat = '', editMetodo = '', editMetodoGen = '';
 function openEditModal(id) {
   var t = S.tx.find(function(x){ return x.id === id; });
   if (!t) return;
-  editId = id; editType = t.type; editCat = t.cat || ''; editMetodo = t.metodo || '';
+  editId = id; editType = t.type; editCat = t.cat || ''; editMetodo = t.metodo || ''; editMetodoGen = t.metodoGen || '';
+  document.getElementById('editStore').value  = t.store  || '';
   document.getElementById('editDesc').value   = t.desc   || '';
   document.getElementById('editAmount').value = t.amount || '';
   document.getElementById('editDate').value   = t.date   || '';
   document.getElementById('editTypExp').classList.toggle('active', editType === 'expense');
   document.getElementById('editTypInc').classList.toggle('active', editType === 'income');
-  renderEditCats(); renderEditMetodos();
+  populateStoreList();
+  renderEditCats(); renderEditMetodosGen(); renderEditMetodos();
   document.getElementById('editModal').classList.add('open');
 }
 function setEditType(t) {
@@ -1155,22 +1207,36 @@ function renderEditMetodos() {
     el.appendChild(c);
   });
 }
+function renderEditMetodosGen() {
+  var el = document.getElementById('editMetodoGenChips'); el.innerHTML = '';
+  METODOS_GEN.forEach(function(m){
+    var c = document.createElement('button');
+    c.className = 'cat-chip' + (editMetodoGen === m ? ' active' : '');
+    c.textContent = m;
+    c.onclick = function(){ editMetodoGen = m; renderEditMetodosGen(); };
+    el.appendChild(c);
+  });
+}
 function closeEditModal() { document.getElementById('editModal').classList.remove('open'); }
 function handleEditBgClick(e) { if (e.target === document.getElementById('editModal')) closeEditModal(); }
 function saveEdit() {
-  var amt = parseFloat(document.getElementById('editAmount').value);
-  var date = document.getElementById('editDate').value;
-  if (!editCat)        { toast('Pick a category ⚠️'); return; }
-  if (!amt || amt <= 0){ toast('Enter a valid amount ⚠️'); return; }
-  if (!date)           { toast('Pick a date ⚠️'); return; }
+  var store = document.getElementById('editStore').value.trim();
+  var amt   = parseFloat(document.getElementById('editAmount').value);
+  var date  = document.getElementById('editDate').value;
+  if (!store)           { toast('Ingresa el establecimiento ⚠️'); return; }
+  if (!editCat)         { toast('Pick a category ⚠️'); return; }
+  if (!amt || amt <= 0) { toast('Enter a valid amount ⚠️'); return; }
+  if (!date)            { toast('Pick a date ⚠️'); return; }
   var t = S.tx.find(function(x){ return x.id === editId; });
   if (!t) return;
-  t.type   = editType;
-  t.cat    = editCat;
-  t.metodo = editMetodo;
-  t.desc   = document.getElementById('editDesc').value.trim();
-  t.amount = amt;
-  t.date   = date;
+  t.type      = editType;
+  t.cat       = editCat;
+  t.metodoGen = editMetodoGen;
+  t.metodo    = editMetodo;
+  t.store     = store;
+  t.desc      = document.getElementById('editDesc').value.trim();
+  t.amount    = amt;
+  t.date      = date;
   save(); renderDash();
   if (document.getElementById('page-history').classList.contains('active')) renderHistory();
   closeEditModal();
@@ -1270,7 +1336,7 @@ function renderRecurList() {
 }
 
 // ── HISTORY FILTERS ──
-var fType = '', fCat = '', fMetodo = '';
+var fType = '', fCat = '', fMetodo = '', fMetodoGen = '';
 function renderHistoryFilters() {
   var types = [['All',''],['Expense','expense'],['Income','income']];
   var fc = document.getElementById('fTypeChips'); fc.innerHTML = '';
@@ -1292,6 +1358,15 @@ function renderHistoryFilters() {
     fcc.appendChild(c);
   });
 
+  var fmgc = document.getElementById('fMetodoGenChips'); fmgc.innerHTML = '';
+  METODOS_GEN.forEach(function(m){
+    var c = document.createElement('button');
+    c.className = 'filter-chip' + (fMetodoGen === m ? ' active' : '');
+    c.textContent = m;
+    c.onclick = function(){ fMetodoGen = (fMetodoGen === m ? '' : m); renderHistoryFilters(); renderHistory(); };
+    fmgc.appendChild(c);
+  });
+
   var fmc = document.getElementById('fMetodoChips'); fmc.innerHTML = '';
   METODOS.forEach(function(m){
     var c = document.createElement('button');
@@ -1301,7 +1376,7 @@ function renderHistoryFilters() {
     fmc.appendChild(c);
   });
 }
-function clearFilters() { fType = ''; fCat = ''; fMetodo = ''; renderHistoryFilters(); renderHistory(); }
+function clearFilters() { fType = ''; fCat = ''; fMetodo = ''; fMetodoGen = ''; renderHistoryFilters(); renderHistory(); }
 
 // ── HISTORY ──
 function renderHistory() {
@@ -1309,9 +1384,10 @@ function renderHistory() {
   var el = document.getElementById('allList');
   el.innerHTML = '';
   var sorted = S.tx.slice().reverse().filter(function(t){
-    if (fType   && t.type   !== fType)   return false;
-    if (fCat    && t.cat    !== fCat)    return false;
-    if (fMetodo && t.metodo !== fMetodo) return false;
+    if (fType      && t.type      !== fType)      return false;
+    if (fCat       && t.cat       !== fCat)       return false;
+    if (fMetodoGen && t.metodoGen !== fMetodoGen) return false;
+    if (fMetodo    && t.metodo    !== fMetodo)    return false;
     return true;
   });
   var countEl = document.getElementById('historyCount');
@@ -1352,10 +1428,10 @@ function renderReports() {
   var ai  = S.tx.filter(function(t){ return t.type==='income'; }).reduce(function(s,t){ return s+t.amount; }, 0);
   var ae  = S.tx.filter(function(t){ return t.type==='expense'; }).reduce(function(s,t){ return s+t.amount; }, 0);
   var net = ai - ae;
-  document.getElementById('repInc').textContent = fmtD(ai);
-  document.getElementById('repExp').textContent = fmtD(ae);
+  document.getElementById('repInc').textContent = fmtAbbr(ai);
+  document.getElementById('repExp').textContent = fmtAbbr(ae);
   var netEl = document.getElementById('repNet');
-  netEl.textContent = fmtD(net);
+  netEl.textContent = fmtAbbr(net);
   netEl.className   = 'sum-val ' + (net >= 0 ? 'net-pos' : 'net-neg');
 
   var exps = S.tx.filter(function(t){ return t.type==='expense'; });
@@ -1366,7 +1442,7 @@ function renderReports() {
   var donutData = sorted.map(function(kv,i){ return {cat:kv[0],val:kv[1],color:CAT_COLORS[i%CAT_COLORS.length]}; });
 
   drawDonut(donutData, total);
-  document.getElementById('donutTotal').textContent = fmtD(ae);
+  document.getElementById('donutTotal').textContent = fmtAbbr(ae);
 
   var legend = document.getElementById('donutLegend');
   legend.innerHTML = '';
@@ -1391,7 +1467,7 @@ function renderReports() {
     var color = CAT_COLORS[i%CAT_COLORS.length];
     var d = document.createElement('div');
     d.innerHTML =
-      '<div class="cat-bar-lbl"><span>'+cat+'</span><span>'+fmtD(amt)+'</span></div>' +
+      '<div class="cat-bar-lbl"><span>'+cat+'</span><span>'+fmtAbbr(amt)+'</span></div>' +
       '<div class="cat-bar-track"><div class="cat-bar-fill" style="width:'+(amt/total*100)+'%;background:'+color+'"></div></div>';
     barsEl.appendChild(d);
   });
@@ -1645,6 +1721,7 @@ function sendToGmail() {
 
 // ── INIT ──
 renderCats();
+renderMetodosGen();
 renderMetodos();
 renderRCats();
 renderDash();

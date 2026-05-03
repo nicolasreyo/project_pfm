@@ -475,6 +475,11 @@ select.form-input { appearance:none; -webkit-appearance:none; }
       </div>
       <div id="catBars"></div>
     </div>
+    <div class="chart-card">
+      <div class="cc-title">Metodo Detallado</div>
+      <div class="cc-sub">Expense distribution by payment method</div>
+      <div id="metodoDetBars"></div>
+    </div>
   </div>
 </div>
 
@@ -1470,6 +1475,35 @@ function renderReports() {
       '<div class="cat-bar-lbl"><span>'+cat+'</span><span>'+fmtD(amt)+'</span></div>' +
       '<div class="cat-bar-track"><div class="cat-bar-fill" style="width:'+(amt/total*100)+'%;background:'+color+'"></div></div>';
     barsEl.appendChild(d);
+  });
+
+  renderMetodoDet(exps);
+}
+
+function renderMetodoDet(exps) {
+  var METODO_COLORS = {
+    '🔵 Blue':'#2563eb','🟣 Purple':'#7c3aed','🟠 Orange':'#f97316',
+    '🔴 Red':'#dc2626','🟢 Green':'#16a34a'
+  };
+  var el = document.getElementById('metodoDetBars');
+  el.innerHTML = '';
+  var mm = {};
+  exps.forEach(function(t){ if (t.metodo) mm[t.metodo] = (mm[t.metodo]||0) + t.amount; });
+  var sorted = Object.entries(mm).sort(function(a,b){ return b[1]-a[1]; });
+  var total = sorted.reduce(function(s,kv){ return s+kv[1]; }, 0) || 1;
+  if (!sorted.length) {
+    el.innerHTML = '<p style="color:var(--text2);font-size:14px;text-align:center;padding:16px 0">No metodo data yet</p>';
+    return;
+  }
+  sorted.forEach(function(kv){
+    var m = kv[0], amt = kv[1];
+    var pct = (amt/total*100).toFixed(1);
+    var color = METODO_COLORS[m] || '#64748b';
+    var d = document.createElement('div');
+    d.innerHTML =
+      '<div class="cat-bar-lbl"><span>'+m+'</span><span>'+fmtD(amt)+' · '+pct+'%</span></div>' +
+      '<div class="cat-bar-track"><div class="cat-bar-fill" style="width:'+(amt/total*100)+'%;background:'+color+'"></div></div>';
+    el.appendChild(d);
   });
 }
 

@@ -1,4 +1,4 @@
-const CACHE = 'fintrack-v15';
+const CACHE = 'fintrack-v16';
 const ASSETS = [
   './',
   './index.html',
